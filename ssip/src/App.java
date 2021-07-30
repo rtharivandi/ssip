@@ -29,29 +29,39 @@ public class App {
                 JFrame frame = new JFrame("SSIP");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+                //Creating the BufferedImage
                 BufferedImage bufferedImage = null;
-
-                try {
-                    bufferedImage = ImageIO.read(getClass().getResource(images.get(currentSlide)));
-                } catch (IOException e) {
-                    System.err.println("File error.");
-                }
-    
-                ImageIcon imageIcon = new ImageIcon(bufferedImage);
-                JLabel label = new JLabel();
-    
-                // Set icon is the command that changes the picture
-                label.setIcon(imageIcon);
-    
-                frame.getContentPane().add(label, BorderLayout.CENTER);
-                frame.pack();
-    
-                // Centering the frame
-                frame.setLocationRelativeTo(null);
-    
-                // Making it visible
-                frame.setVisible(true);
                 
+               
+                    try {
+                        bufferedImage = ImageIO.read(new File(images.get(0)));
+                    } catch (IOException e) {
+                        System.err.println("File error.");
+                    }
+        
+                    ImageIcon imageIcon = new ImageIcon(bufferedImage);
+                    JLabel label = new JLabel();
+        
+                    // Set icon is the command that changes the picture
+                    label.setIcon(imageIcon);
+        
+                    frame.getContentPane().add(label, BorderLayout.CENTER);
+                    frame.pack();
+        
+                    // Centering the frame
+                    frame.setLocationRelativeTo(null);
+        
+                    // Making it visible
+                    frame.setVisible(true);
+
+                    // try {
+                    //     Thread.sleep(1500);
+                    // } catch (InterruptedException e) {
+                    //     e.fillInStackTrace();
+                    // }
+                
+                //System.out.println(images.get(0));
+
                 }
 
 
@@ -60,7 +70,7 @@ public class App {
         
     }
 
-    public void nextImage() {
+    public static void nextImage() {
         currentSlide = (currentSlide + 1) % images.size();
     }
 
@@ -73,6 +83,7 @@ public class App {
 
             //Scanner scanner = new Scanner(System.in);
             char command = new Scanner(System.in).next().charAt(0);
+            App currentApp = null;
 
             if (command == 'a') {
                 System.out.println("Please enter the path of the pic.");
@@ -86,7 +97,8 @@ public class App {
             } else if (command == 'c') {
                 images.clear();
             } else if (command == 'n') {
-                currentSlide++;  
+                nextImage();  
+                //new App();
             } else if (command == 'e') {
                 return;
             } else {
