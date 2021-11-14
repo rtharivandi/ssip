@@ -9,6 +9,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class App extends JFrame {
     private static ArrayList<String> images = new ArrayList<>();
     private static int currentSlide = -1;
 
-    private JLabel slidesLabel = new JLabel();
+    private static JLabel slidesLabel = new JLabel();
     private static ArrayList<Icon> icons = new ArrayList<>();
 
     public App() {
@@ -64,6 +65,7 @@ public class App extends JFrame {
                         System.out.println("Folder added!");
                         insertFilesFolder(readFile);
                     } else {
+                        //TODO:Do the resizing thing with single files as well!
                         icons.add(new ImageIcon(ImageIO.read(new File(path))));
                     }
                     System.out.println("File succesfully added.");
@@ -104,7 +106,21 @@ public class App extends JFrame {
     public static void insertFilesFolder (File folder) throws IOException {
         for (File file : folder.listFiles()) {
             if (!file.isDirectory() && ImageIO.read(file) != null) {
-                icons.add(new ImageIcon(ImageIO.read(file)));
+
+                BufferedImage bufferedImage = null;
+
+                try {
+                    bufferedImage = ImageIO.read(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //TODO:Deal with non 1920x1080 images
+                //TODO: Find a way to stretch the JLabel to the size of the current pic!
+
+                Image resizedImage = bufferedImage.getScaledInstance(1920, 1080, Image.SCALE_SMOOTH);
+                ImageIcon imageIcon = new ImageIcon(resizedImage);
+                icons.add(imageIcon);
             }
         }
     }
