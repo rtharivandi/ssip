@@ -20,11 +20,11 @@ public class App extends JFrame {
     private final static int WIDTH = 1920;
     private final static int HEIGHT = 1080;
 
-    private static ArrayList<String> images = new ArrayList<>();
+    private static final ArrayList<String> images = new ArrayList<>();
     private static int currentSlide = 0;
 
-    private static JLabel slidesLabel = new JLabel();
-    private static ArrayList<Icon> icons = new ArrayList<>();
+    private static final JLabel slidesLabel = new JLabel();
+    private static final ArrayList<Icon> icons = new ArrayList<>();
 
     public App() {
         slidesLabel.setVerticalAlignment(JLabel.CENTER);
