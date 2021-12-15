@@ -1,10 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class App extends JFrame {
 
@@ -23,21 +18,25 @@ public class App extends JFrame {
 
     private static int currentSlide = 0;
 
-    private static final JLabel slidesLabel = new JLabel();
+    private static final JLabel appLabel = new JLabel();
     private static final ArrayList<File> images = new ArrayList<>();
 
     //Constructor
     public App() {
-        slidesLabel.setVerticalAlignment(JLabel.CENTER);
-        slidesLabel.setHorizontalAlignment(JLabel.CENTER);
-        slidesLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        appLabel.setVerticalAlignment(JLabel.CENTER);
+        appLabel.setHorizontalAlignment(JLabel.CENTER);
+        appLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setLayout(new BorderLayout());
-        add(slidesLabel, BorderLayout.CENTER);
-        slidesLabel.addMouseListener(new ClickListener());
+        add(appLabel, BorderLayout.CENTER);
+        appLabel.addMouseListener(new ClickListener());
+        //Important for keyListener
+        appLabel.setFocusable(true);
+        appLabel.requestFocusInWindow();
+        appLabel.addKeyListener(new KeyPressListener());
     }
 
     private void prevImage() {
-        currentSlide = (currentSlide - 1) % images.size();
+        currentSlide = Math.abs((currentSlide - 1) % images.size());
         update();
     }
 
@@ -51,7 +50,7 @@ public class App extends JFrame {
         File file = images.get(currentSlide);
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
-            slidesLabel.setIcon(new ImageIcon(bufferedImage));
+            appLabel.setIcon(new ImageIcon(bufferedImage));
         } catch (IOException e) {
             System.err.println("File error, please try again!");
         }
@@ -61,21 +60,18 @@ public class App extends JFrame {
         if (images.isEmpty()) {
             System.out.println("No files in queue, please add some.");
         } else {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                            | UnsupportedLookAndFeelException ex) {
-                        ex.printStackTrace();
-                    }
-                    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    pack();
-                    setLocationRelativeTo(null);
-                    setVisible(true);
-                    update();
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                        | UnsupportedLookAndFeelException ex) {
+                    ex.printStackTrace();
                 }
+                setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                pack();
+                setLocationRelativeTo(null);
+                setVisible(true);
+                update();
             });
         }
     }
@@ -103,7 +99,7 @@ public class App extends JFrame {
             File file = chooser.getSelectedFile();
             try {
                 insertFilesFolder(file);
-                System.out.println("File(s) succesfully added.\n");
+                System.out.println("File " + chooser.getSelectedFile().getAbsolutePath() + " succesfully added.\n");
             } catch (IOException e) {
                 System.out.println("Error. Please try again.\n");
             }
@@ -117,21 +113,22 @@ public class App extends JFrame {
         }
     }
 
-    private class KeyPressListener implements KeyListener {
-
+    private class KeyPressListener extends KeyAdapter {
         @Override
         public void keyTyped(KeyEvent e) {
-
         }
 
         @Override
         public void keyPressed(KeyEvent e) {
-
+            int keyCode = e.getKeyCode();
+            switch (keyCode) {
+                case KeyEvent.VK_LEFT -> prevImage();
+                case KeyEvent.VK_RIGHT -> nextImage();
+            }
         }
 
         @Override
         public void keyReleased(KeyEvent e) {
-
         }
     }
 
