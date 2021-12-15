@@ -1,6 +1,8 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -19,11 +21,12 @@ public class App extends JFrame {
     private final static int WIDTH = 1920;
     private final static int HEIGHT = 1080;
 
-    private static int currentSlide = 1;
+    private static int currentSlide = 0;
 
     private static final JLabel slidesLabel = new JLabel();
     private static final ArrayList<File> images = new ArrayList<>();
 
+    //Constructor
     public App() {
         slidesLabel.setVerticalAlignment(JLabel.CENTER);
         slidesLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -33,8 +36,18 @@ public class App extends JFrame {
         slidesLabel.addMouseListener(new ClickListener());
     }
 
-    public void nextImage() {
+    private void prevImage() {
+        currentSlide = (currentSlide - 1) % images.size();
+        update();
+    }
+
+
+    private void nextImage() {
         currentSlide = (currentSlide + 1) % images.size();
+        update();
+    }
+
+    private void update() {
         File file = images.get(currentSlide);
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
@@ -44,7 +57,7 @@ public class App extends JFrame {
         }
     }
 
-    public static void startSlideshow(App app) {
+    private void startSlideshow() {
         if (images.isEmpty()) {
             System.out.println("No files in queue, please add some.");
         } else {
@@ -57,23 +70,23 @@ public class App extends JFrame {
                             | UnsupportedLookAndFeelException ex) {
                         ex.printStackTrace();
                     }
-
-                    app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    app.pack();
-                    app.setLocationRelativeTo(null);
-                    app.setVisible(true);
+                    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    pack();
+                    setLocationRelativeTo(null);
+                    setVisible(true);
+                    update();
                 }
             });
         }
     }
 
-    public static void insertFilesFolder(File folder) throws IOException {
+    private static void insertFilesFolder(File folder) throws IOException {
         System.out.println("Loading...");
         images.addAll(Arrays.asList(Objects.requireNonNull(folder.listFiles())));
         images.removeIf(App::isNotImage);
     }
 
-    public static boolean isNotImage (File file) {
+    private static boolean isNotImage(File file) {
         try {
             return !Files.probeContentType(file.toPath()).split("/")[0].equals("image");
         } catch (IOException | NullPointerException e) {
@@ -81,8 +94,8 @@ public class App extends JFrame {
         }
     }
 
-    public static void selectFiles() {
-        System.out.println("Please choose the path of the pic.");
+    private static void selectFiles() {
+        System.out.println("Please choose the path of the files.");
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         int returnVal = chooser.showOpenDialog(null);
@@ -97,15 +110,32 @@ public class App extends JFrame {
         }
     }
 
-    public class ClickListener extends MouseAdapter {
+    private class ClickListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             nextImage();
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    private class KeyPressListener implements KeyListener {
 
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
+    }
+
+    public void start() throws Exception {
         while (true) {
             System.out.println("Please enter a command!");
             System.out.println("p : Play the slideshow.\na : Add a new file.\nc : Clear the queue\ne: End the program");
@@ -115,8 +145,7 @@ public class App extends JFrame {
             if (command == 'a') {
                 selectFiles();
             } else if (command == 'p') {
-                App app = new App();
-                startSlideshow(app);
+                startSlideshow();
             } else if (command == 'c') {
                 images.clear();
             } else if (command == 'e') {
