@@ -1,5 +1,5 @@
 # ssip
-Stupidly Simple Image Program
+A Stupidly Simple Image Program written in Java.
 
 Right now it only does one thing, which is make a slideshow out of different folders.
 I could probably implement more features in the future, such as simple editing of the pictures, downloading pictures directly from profiles, etc.
