@@ -3,7 +3,7 @@ public class Menu {
         App app = new App();
         app.setTitle("SSIP Pre-Alpha");
         try {
-            app.start();
+            app.startSlideshow();
         } catch (Exception e) {
             e.printStackTrace();
         }

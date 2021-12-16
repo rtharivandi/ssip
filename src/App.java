@@ -38,7 +38,7 @@ public class App extends JFrame {
         setLayout(new BorderLayout());
         add(appLabel, BorderLayout.CENTER);
 
-        setJMenuBar(new AppMenuBar());
+        setJMenuBar(new AppMenuBar(this));
 
         appLabel.addMouseListener(new ClickListener());
 
@@ -63,7 +63,7 @@ public class App extends JFrame {
     }
 
     //TODO: Fit the image to the windows
-    private void update() {
+    void update() {
         File file = images.get(currentSlide);
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
@@ -75,37 +75,49 @@ public class App extends JFrame {
         }
     }
 
-    private void startTimer() {
+    void startTimer() {
         //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
         scheduledFuture = Executors.newScheduledThreadPool(1);
         final ScheduledFuture<?> timer = scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.SECONDS);
     }
 
-    private void startSlideshow() {
+    void stopTimer() {
+        scheduledFuture.shutdown();
+    }
+
+    boolean isTimerActive() {
+        return (scheduledFuture != null);
+    }
+
+    void startSlideshow() {
 //        if (images.isEmpty()) {
 //            System.out.println("No files in queue, please add some.");
 //        } else {
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                        | UnsupportedLookAndFeelException ex) {
-                    ex.printStackTrace();
-                }
-                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                pack();
-                setLocationRelativeTo(null);
-                setVisible(true);
-                update();
-                if (startWithTimer)
-                    startTimer();
-            });
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                    | UnsupportedLookAndFeelException ex) {
+                ex.printStackTrace();
+            }
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            pack();
+            setLocationRelativeTo(null);
+            setVisible(true);
+//                update();
+//                if (startWithTimer)
+//                    startTimer();
+        });
 //        }
     }
 
-    private static void insertFilesFolder(File folder) throws IOException {
-        images.addAll(Arrays.asList(Objects.requireNonNull(folder.listFiles())));
-        images.removeIf(App::isNotImage);
+    private static void insertFilesFolder(File file) throws IOException {
+        if (file.isDirectory()) {
+            images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
+            images.removeIf(App::isNotImage);
+        } else if (file.isFile() && isNotImage(file)) {
+            images.add(file);
+        }
     }
 
     private static boolean isNotImage(File file) {
@@ -119,13 +131,10 @@ public class App extends JFrame {
     static void selectFiles() {
         System.out.println("Please choose the path of the files.");
         JFileChooser chooser = new ImageFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        chooser.setPreferredSize(new Dimension(1000, 800));
-        chooser.setMultiSelectionEnabled(true);
         int returnVal = chooser.showOpenDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = chooser.getSelectedFiles();
-            for (File file : files){
+            for (File file : files) {
                 try {
                     insertFilesFolder(file);
                     System.out.println("File '" + file.getAbsolutePath() + "' succesfully added.\n");
@@ -162,50 +171,63 @@ public class App extends JFrame {
         }
     }
 
-    public void start() {
-        boolean isRunning = true;
-        while (isRunning) {
-            System.out.println("Please enter a command!");
-            System.out.println("""
-                    --------------------------------------------
-                    p : Play the slideshow.
-                    a : Add a new file.
-                    c : Clear the queue
-                    e: End the program
-                    t: Set/Turn off a scheduled slideshow + (time in seconds)
-                    --------------------------------------------""");
+    static void clearFiles() {
+        images.clear();
+    }
 
-            String[] commands = new Scanner(System.in).nextLine().split(" ");
-            switch (commands[0]) {
-                case "a" -> selectFiles();
-                case "p" -> startSlideshow();
-                case "c" -> images.clear();
-                case "e" -> {
-                    if (scheduledFuture != null)
-                        scheduledFuture.shutdown();
-                    isRunning = false;
-                }
-                case "t" -> {
-                    if (startWithTimer && !scheduledFuture.isShutdown())
-                        scheduledFuture.shutdown();
-                    else if (commands.length < 2)
-                        System.out.println("Enter the time in seconds!");
-                    else {
-                        String timer = commands[1];
-                        if (timer.matches("^[+-]?\\d+$")) {
-                            timerTime = Integer.parseInt(timer);
-                            System.out.println("Timer succesfully set to " + timerTime + " seconds");
-                            startWithTimer =  true;
-                        } else
-                            System.out.println("Please enter a valid time in seconds.");
-                    }
-                }
-                default -> System.out.println("Please enter a valid command!");
-            }
+    void setTimer(int seconds) {
+        if (startWithTimer && !scheduledFuture.isShutdown())
+            scheduledFuture.shutdown();
+        else {
+            timerTime = seconds;
+            System.out.println("Timer succesfully set to " + timerTime + " seconds");
         }
     }
 
-}
+        public void start () {
+            boolean isRunning = true;
+            while (isRunning) {
+                System.out.println("Please enter a command!");
+                System.out.println("""
+                        --------------------------------------------
+                        p : Play the slideshow.
+                        a : Add a new file.
+                        c : Clear the queue
+                        e: End the program
+                        t: Set/Turn off a scheduled slideshow + (time in seconds)
+                        --------------------------------------------""");
+
+                String[] commands = new Scanner(System.in).nextLine().split(" ");
+                switch (commands[0]) {
+                    case "a" -> selectFiles();
+                    case "p" -> startSlideshow();
+                    case "c" -> images.clear();
+                    case "e" -> {
+                        if (scheduledFuture != null)
+                            scheduledFuture.shutdown();
+                        isRunning = false;
+                    }
+                    case "t" -> {
+                        if (startWithTimer && !scheduledFuture.isShutdown())
+                            scheduledFuture.shutdown();
+                        else if (commands.length < 2)
+                            System.out.println("Enter the time in seconds!");
+                        else {
+                            String timer = commands[1];
+                            if (timer.matches("^[+-]?\\d+$")) {
+                                timerTime = Integer.parseInt(timer);
+                                System.out.println("Timer succesfully set to " + timerTime + " seconds");
+                                startWithTimer = true;
+                            } else
+                                System.out.println("Please enter a valid time in seconds.");
+                        }
+                    }
+                    default -> System.out.println("Please enter a valid command!");
+                }
+            }
+        }
+
+    }
 
 
 
