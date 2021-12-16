@@ -16,13 +16,17 @@ import java.util.concurrent.*;
 
 public class App extends JFrame {
 
-    private final static int WIDTH = 1920;
+    private final static int WIDTH = 1080;
     private final static int HEIGHT = 1080;
 
     private static int currentSlide = 0;
 
     private static final JLabel appLabel = new JLabel();
     private static final ArrayList<File> images = new ArrayList<>();
+
+    private ScheduledExecutorService scheduledFuture;
+    private long timerTime = 3;
+    private boolean startWithTimer = false;
 
     //Constructor
     public App() {
@@ -39,8 +43,8 @@ public class App extends JFrame {
     }
 
     private void prevImage() {
-        if(currentSlide == 0)
-            currentSlide = images.size()-1;
+        if (currentSlide == 0)
+            currentSlide = images.size() - 1;
         else
             currentSlide = (currentSlide - 1) % images.size();
         update();
@@ -57,37 +61,18 @@ public class App extends JFrame {
         File file = images.get(currentSlide);
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
-            Dimension scaled = getScaledDimension(new Dimension(bufferedImage.getWidth(), bufferedImage.getHeight()), getWindowDimension());
-            appLabel.setIcon(new ImageIcon(getScaledImage(bufferedImage, scaled.width, scaled.height)));
+            //Dimension scaled = getScaledDimension(new Dimension(bufferedImage.getWidth(), bufferedImage.getHeight()), getWindowDimension());
+            appLabel.setIcon(new ImageIcon(bufferedImage));
 //            appLabel.setIcon(new ImageIcon(bufferedImage));
         } catch (IOException e) {
             System.err.println("File error, please try again!");
         }
     }
 
-    private void startWithTimer(long s) {
+    private void startTimer() {
         //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
-        ScheduledExecutorService scheduledFuture = Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> timer = scheduledFuture.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                nextImage();
-            }
-        }, s, s, TimeUnit.SECONDS);
-    }
-
-    public static BufferedImage getScaledImage(BufferedImage image, int width, int height) throws IOException {
-        int imageWidth  = image.getWidth();
-        int imageHeight = image.getHeight();
-
-        double scaleX = (double)width/imageWidth;
-        double scaleY = (double)height/imageHeight;
-        AffineTransform scaleTransform = AffineTransform.getScaleInstance(scaleX, scaleY);
-        AffineTransformOp bilinearScaleOp = new AffineTransformOp(scaleTransform, AffineTransformOp.TYPE_BILINEAR);
-
-        return bilinearScaleOp.filter(
-                image,
-                new BufferedImage(width, height, image.getType()));
+        scheduledFuture = Executors.newScheduledThreadPool(1);
+        final ScheduledFuture<?> timer = scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.SECONDS);
     }
 
     private void startSlideshow() {
@@ -106,7 +91,8 @@ public class App extends JFrame {
                 setLocationRelativeTo(null);
                 setVisible(true);
                 update();
-                startWithTimer(5);
+                if (startWithTimer)
+                    startTimer();
             });
         }
     }
@@ -128,14 +114,18 @@ public class App extends JFrame {
         System.out.println("Please choose the path of the files.");
         JFileChooser chooser = new ImageFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        chooser.setPreferredSize(new Dimension(1000, 800));
+        chooser.setMultiSelectionEnabled(true);
         int returnVal = chooser.showOpenDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            try {
-                insertFilesFolder(file);
-                System.out.println("File " + chooser.getSelectedFile().getAbsolutePath() + " succesfully added.\n");
-            } catch (IOException e) {
-                System.out.println("Error. Please try again.\n");
+            File[] files = chooser.getSelectedFiles();
+            for (File file : files){
+                try {
+                    insertFilesFolder(file);
+                    System.out.println("File '" + file.getAbsolutePath() + "' succesfully added.\n");
+                } catch (IOException e) {
+                    System.out.println("Error. Please try again.\n");
+                }
             }
         }
     }
@@ -166,57 +156,49 @@ public class App extends JFrame {
         }
     }
 
-    private Dimension getWindowDimension() {
-        return new Dimension(WIDTH, HEIGHT);
-    }
-
-    private Dimension getScaledDimension(Dimension imgSize, Dimension boundary) {
-        int original_width = imgSize.width;
-        int original_height = imgSize.height;
-        int bound_width = boundary.width;
-        int bound_height = boundary.height;
-        int new_width = original_width;
-        int new_height = original_height;
-
-        // first check if we need to scale width
-        if (original_width > bound_width) {
-            //scale width to fit
-            new_width = bound_width;
-            //scale height to maintain aspect ratio
-            new_height = (new_width * original_height) / original_width;
-        }
-
-        // then check if we need to scale even with the new height
-        if (new_height > bound_height) {
-            //scale height to fit instead
-            new_height = bound_height;
-            //scale width to maintain aspect ratio
-            new_width = (new_height * original_width) / original_height;
-        }
-
-        return new Dimension(new_width, new_height);
-    }
-
-    public void start() throws Exception {
-        while (true) {
+    public void start() {
+        boolean isRunning = true;
+        while (isRunning) {
             System.out.println("Please enter a command!");
-            System.out.println("p : Play the slideshow.\na : Add a new file.\nc : Clear the queue\ne: End the program");
+            System.out.println("""
+                    --------------------------------------------
+                    p : Play the slideshow.
+                    a : Add a new file.
+                    c : Clear the queue
+                    e: End the program
+                    t: Set/Turn off a scheduled slideshow + (time in seconds)
+                    --------------------------------------------""");
 
-            char command = new Scanner(System.in).next().charAt(0);
-
-            if (command == 'a') {
-                selectFiles();
-            } else if (command == 'p') {
-                startSlideshow();
-            } else if (command == 'c') {
-                images.clear();
-            } else if (command == 'e') {
-                break;
-            } else {
-                System.out.println("Please enter a valid command.\n");
+            String[] commands = new Scanner(System.in).nextLine().split(" ");
+            switch (commands[0]) {
+                case "a" -> selectFiles();
+                case "p" -> startSlideshow();
+                case "c" -> images.clear();
+                case "e" -> {
+                    if (scheduledFuture != null)
+                        scheduledFuture.shutdown();
+                    isRunning = false;
+                }
+                case "t" -> {
+                    if (startWithTimer && !scheduledFuture.isShutdown())
+                        scheduledFuture.shutdown();
+                    else if (commands.length < 2)
+                        System.out.println("Enter the time in seconds!");
+                    else {
+                        String timer = commands[1];
+                        if (timer.matches("^[+-]?\\d+$")) {
+                            timerTime = Integer.parseInt(timer);
+                            System.out.println("Timer succesfully set to " + timerTime + " seconds");
+                            startWithTimer =  true;
+                        } else
+                            System.out.println("Please enter a valid time in seconds.");
+                    }
+                }
+                default -> System.out.println("Please enter a valid commands");
             }
         }
     }
+
 
 }
 
