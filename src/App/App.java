@@ -1,17 +1,14 @@
 package App;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class App extends JFrame {
@@ -89,11 +86,11 @@ public class App extends JFrame {
         });
     }
 
-    private static void insertFilesFolder(File file) throws IOException {
+    private static void insertFiles(File file) throws IOException {
         if (file.isDirectory()) {
             images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
             images.removeIf(App::isNotImage);
-        } else if (file.isFile() && isNotImage(file)) {
+        } else if (file.isFile() && !isNotImage(file)) {
             images.add(file);
         }
     }
@@ -114,7 +111,7 @@ public class App extends JFrame {
             File[] files = chooser.getSelectedFiles();
             for (File file : files) {
                 try {
-                    insertFilesFolder(file);
+                    insertFiles(file);
                     System.out.println("File '" + file.getAbsolutePath() + "' succesfully added.\n");
                 } catch (IOException e) {
                     System.out.println("Error. Please try again.\n");
@@ -151,6 +148,14 @@ public class App extends JFrame {
 
     static void clearFiles() {
         images.clear();
+    }
+
+    boolean isScheduledFutureNull() {
+        return scheduledFuture == null;
+    }
+
+    boolean imagesEmpty() {
+        return !images.isEmpty();
     }
 
 //    void setTimer(int seconds) {
