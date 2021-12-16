@@ -22,7 +22,9 @@ public class App extends JFrame {
     private static final ArrayList<File> images = new ArrayList<>();
 
     private ScheduledExecutorService scheduledFuture;
-    private long timerTime = 3;
+    private long timerTime = 2500;
+
+    private String lastPath;
 
     //Constructor
     public App() {
@@ -64,7 +66,7 @@ public class App extends JFrame {
     void startTimer() {
         //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
         scheduledFuture = Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> timer = scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.SECONDS);
+        scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.MILLISECONDS);
     }
 
     void stopTimer() {
@@ -86,7 +88,7 @@ public class App extends JFrame {
         });
     }
 
-    private static void insertFiles(File file) throws IOException {
+    private void insertFiles(File file) throws IOException {
         if (file.isDirectory()) {
             images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
             images.removeIf(App::isNotImage);
@@ -104,8 +106,15 @@ public class App extends JFrame {
     }
 
     void selectFiles() {
-        System.out.println("Please choose the path of the files.");
-        JFileChooser chooser = new ImageFileChooser();
+//        System.out.println("Please choose the path of the files.");
+        JFileChooser chooser;
+        if (lastPath == null) {
+            chooser = new ImageFileChooser();
+        } else {
+            chooser = new ImageFileChooser(lastPath);
+
+        }
+
         int returnVal = chooser.showOpenDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = chooser.getSelectedFiles();
@@ -118,6 +127,8 @@ public class App extends JFrame {
                 }
             }
         }
+
+        lastPath = chooser.getSelectedFile().getParent();
     }
 
     private class ClickListener extends MouseAdapter {
@@ -146,7 +157,7 @@ public class App extends JFrame {
         }
     }
 
-    static void clearFiles() {
+    void clearFiles() {
         images.clear();
     }
 
@@ -157,6 +168,8 @@ public class App extends JFrame {
     boolean imagesEmpty() {
         return !images.isEmpty();
     }
+
+
 
 //    void setTimer(int seconds) {
 //        if (startWithTimer && !scheduledFuture.isShutdown())

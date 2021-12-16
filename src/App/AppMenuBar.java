@@ -33,7 +33,7 @@ public class AppMenuBar extends JMenuBar {
         addFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                App.clearFiles();
+                app.clearFiles();
             }
         });
         file.add(addFiles);
