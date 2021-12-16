@@ -26,7 +26,6 @@ public class App extends JFrame {
 
     private ScheduledExecutorService scheduledFuture;
     private long timerTime = 3;
-    private boolean startWithTimer = false;
 
     //Constructor
     public App() {
@@ -154,14 +153,14 @@ public class App extends JFrame {
         images.clear();
     }
 
-    void setTimer(int seconds) {
-        if (startWithTimer && !scheduledFuture.isShutdown())
-            scheduledFuture.shutdown();
-        else {
-            timerTime = seconds;
-            System.out.println("Timer succesfully set to " + timerTime + " seconds");
-        }
-    }
+//    void setTimer(int seconds) {
+//        if (startWithTimer && !scheduledFuture.isShutdown())
+//            scheduledFuture.shutdown();
+//        else {
+//            timerTime = seconds;
+//            System.out.println("Timer succesfully set to " + timerTime + " seconds");
+//        }
+//    }
 
 //        public void start () {
 //            boolean isRunning = true;
