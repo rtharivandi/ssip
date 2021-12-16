@@ -1,3 +1,5 @@
+package App;
+
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
@@ -6,8 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class AppMenuBar extends JMenuBar {
-
-    private App app;
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -18,8 +18,6 @@ public class AppMenuBar extends JMenuBar {
     }
 
     public AppMenuBar(App app) {
-        this.app = app;
-
         JMenu file = new JMenu("File");
         JMenuItem addFiles = new JMenuItem("Add file(s)");
         JMenuItem clearFiles = new JMenuItem("Clear files");
@@ -27,7 +25,7 @@ public class AppMenuBar extends JMenuBar {
         addFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                App.selectFiles();
+                app.selectFiles();
                 app.update();
             }
         });

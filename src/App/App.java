@@ -1,11 +1,9 @@
+package App;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,15 +62,7 @@ public class App extends JFrame {
 
     //TODO: Fit the image to the windows
     void update() {
-        File file = images.get(currentSlide);
-        try {
-            BufferedImage bufferedImage = ImageIO.read(file);
-            //Dimension scaled = getScaledDimension(new Dimension(bufferedImage.getWidth(), bufferedImage.getHeight()), getWindowDimension());
-            appLabel.setIcon(new ImageIcon(bufferedImage));
-//            appLabel.setIcon(new ImageIcon(bufferedImage));
-        } catch (IOException e) {
-            System.err.println("File error, please try again!");
-        }
+        appLabel.setIcon(new ImageIcon(images.get(currentSlide).getAbsolutePath()));
     }
 
     void startTimer() {
@@ -85,14 +75,7 @@ public class App extends JFrame {
         scheduledFuture.shutdown();
     }
 
-    boolean isTimerActive() {
-        return (scheduledFuture != null);
-    }
-
-    void startSlideshow() {
-//        if (images.isEmpty()) {
-//            System.out.println("No files in queue, please add some.");
-//        } else {
+    public void createAndShowGUI() {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -104,11 +87,7 @@ public class App extends JFrame {
             pack();
             setLocationRelativeTo(null);
             setVisible(true);
-//                update();
-//                if (startWithTimer)
-//                    startTimer();
         });
-//        }
     }
 
     private static void insertFilesFolder(File file) throws IOException {
@@ -128,7 +107,7 @@ public class App extends JFrame {
         }
     }
 
-    static void selectFiles() {
+    void selectFiles() {
         System.out.println("Please choose the path of the files.");
         JFileChooser chooser = new ImageFileChooser();
         int returnVal = chooser.showOpenDialog(null);
@@ -184,50 +163,50 @@ public class App extends JFrame {
         }
     }
 
-        public void start () {
-            boolean isRunning = true;
-            while (isRunning) {
-                System.out.println("Please enter a command!");
-                System.out.println("""
-                        --------------------------------------------
-                        p : Play the slideshow.
-                        a : Add a new file.
-                        c : Clear the queue
-                        e: End the program
-                        t: Set/Turn off a scheduled slideshow + (time in seconds)
-                        --------------------------------------------""");
+//        public void start () {
+//            boolean isRunning = true;
+//            while (isRunning) {
+//                System.out.println("Please enter a command!");
+//                System.out.println("""
+//                        --------------------------------------------
+//                        p : Play the slideshow.
+//                        a : Add a new file.
+//                        c : Clear the queue
+//                        e: End the program
+//                        t: Set/Turn off a scheduled slideshow + (time in seconds)
+//                        --------------------------------------------""");
+//
+//                String[] commands = new Scanner(System.in).nextLine().split(" ");
+//                switch (commands[0]) {
+//                    case "a" -> selectFiles();
+//                    case "p" -> createAndShowGUI();
+//                    case "c" -> images.clear();
+//                    case "e" -> {
+//                        if (scheduledFuture != null)
+//                            scheduledFuture.shutdown();
+//                        isRunning = false;
+//                    }
+//                    case "t" -> {
+//                        if (startWithTimer && !scheduledFuture.isShutdown())
+//                            scheduledFuture.shutdown();
+//                        else if (commands.length < 2)
+//                            System.out.println("Enter the time in seconds!");
+//                        else {
+//                            String timer = commands[1];
+//                            if (timer.matches("^[+-]?\\d+$")) {
+//                                timerTime = Integer.parseInt(timer);
+//                                System.out.println("Timer succesfully set to " + timerTime + " seconds");
+//                                startWithTimer = true;
+//                            } else
+//                                System.out.println("Please enter a valid time in seconds.");
+//                        }
+//                    }
+//                    default -> System.out.println("Please enter a valid command!");
+//                }
+//            }
+//        }
 
-                String[] commands = new Scanner(System.in).nextLine().split(" ");
-                switch (commands[0]) {
-                    case "a" -> selectFiles();
-                    case "p" -> startSlideshow();
-                    case "c" -> images.clear();
-                    case "e" -> {
-                        if (scheduledFuture != null)
-                            scheduledFuture.shutdown();
-                        isRunning = false;
-                    }
-                    case "t" -> {
-                        if (startWithTimer && !scheduledFuture.isShutdown())
-                            scheduledFuture.shutdown();
-                        else if (commands.length < 2)
-                            System.out.println("Enter the time in seconds!");
-                        else {
-                            String timer = commands[1];
-                            if (timer.matches("^[+-]?\\d+$")) {
-                                timerTime = Integer.parseInt(timer);
-                                System.out.println("Timer succesfully set to " + timerTime + " seconds");
-                                startWithTimer = true;
-                            } else
-                                System.out.println("Please enter a valid time in seconds.");
-                        }
-                    }
-                    default -> System.out.println("Please enter a valid command!");
-                }
-            }
-        }
-
-    }
+}
 
 
 
