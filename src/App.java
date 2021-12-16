@@ -1,5 +1,7 @@
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
@@ -35,7 +37,11 @@ public class App extends JFrame {
         appLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setLayout(new BorderLayout());
         add(appLabel, BorderLayout.CENTER);
+
+        setJMenuBar(new AppMenuBar());
+
         appLabel.addMouseListener(new ClickListener());
+
         //Important for keyListener
         appLabel.setFocusable(true);
         appLabel.requestFocusInWindow();
@@ -76,9 +82,9 @@ public class App extends JFrame {
     }
 
     private void startSlideshow() {
-        if (images.isEmpty()) {
-            System.out.println("No files in queue, please add some.");
-        } else {
+//        if (images.isEmpty()) {
+//            System.out.println("No files in queue, please add some.");
+//        } else {
             SwingUtilities.invokeLater(() -> {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -86,7 +92,7 @@ public class App extends JFrame {
                         | UnsupportedLookAndFeelException ex) {
                     ex.printStackTrace();
                 }
-                setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 pack();
                 setLocationRelativeTo(null);
                 setVisible(true);
@@ -94,7 +100,7 @@ public class App extends JFrame {
                 if (startWithTimer)
                     startTimer();
             });
-        }
+//        }
     }
 
     private static void insertFilesFolder(File folder) throws IOException {
@@ -110,7 +116,7 @@ public class App extends JFrame {
         }
     }
 
-    private static void selectFiles() {
+    static void selectFiles() {
         System.out.println("Please choose the path of the files.");
         JFileChooser chooser = new ImageFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -194,13 +200,13 @@ public class App extends JFrame {
                             System.out.println("Please enter a valid time in seconds.");
                     }
                 }
-                default -> System.out.println("Please enter a valid commands");
+                default -> System.out.println("Please enter a valid command!");
             }
         }
     }
 
-
 }
+
 
 
 
