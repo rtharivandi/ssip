@@ -62,13 +62,22 @@ public class App extends JFrame {
 
     void update() {
         ImageIcon imageIcon;
+        File path;
+
         if (!randomize) {
-            imageIcon = new ImageIcon(images.get(currentSlide).getAbsolutePath());
+            path = images.get(currentSlide);
+//            imageIcon = new ImageIcon(images.get(currentSlide).getAbsolutePath());
         } else {
-            imageIcon = new ImageIcon(images.get(new Random().nextInt(images.size() - 1)).getAbsolutePath());
+//            imageIcon = new ImageIcon(images.get(new Random().nextInt(images.size())).getAbsolutePath());
+            path = images.get(new Random().nextInt(images.size()));
         }
-        Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
-        appLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_SMOOTH)));
+        imageIcon = new ImageIcon(path.getAbsolutePath());
+        if(path.getPath().substring(path.getPath().length()-4).equals(".gif")) {
+            appLabel.setIcon(imageIcon);
+        } else {
+            Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
+            appLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_AREA_AVERAGING)));
+        }
     }
 
     //Method almost works, there are still some pictures that does not fit the frame

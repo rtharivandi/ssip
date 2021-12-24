@@ -30,7 +30,7 @@ public class AppMenuBar extends JMenuBar {
             }
         });
 
-        addFiles.addActionListener(new ActionListener() {
+        clearFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 app.clearFiles();
