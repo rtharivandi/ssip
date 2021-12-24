@@ -36,8 +36,10 @@ public class AppMenuBar extends JMenuBar {
                 app.clearFiles();
             }
         });
+
         file.add(addFiles);
         file.add(clearFiles);
+        add(file);
 
         JMenu play = new JMenu("Play");
         play.addMenuListener(new MenuListener() {
@@ -45,12 +47,33 @@ public class AppMenuBar extends JMenuBar {
             public void menuSelected(MenuEvent e) {
                 if (app.imagesEmpty())
                     app.startTimer();
+
+
             }
 
             @Override
             public void menuDeselected(MenuEvent e) {
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
                 if (!app.isScheduledFutureNull())
                     app.stopTimer();
+            }
+        });
+
+        add(play);
+
+        JMenu random = new JMenu("Random Slideshow");
+        random.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                app.randomize();
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+
             }
 
             @Override
@@ -59,8 +82,8 @@ public class AppMenuBar extends JMenuBar {
             }
         });
 
-        add(file);
-        add(play);
+        add(random);
+
 
         JMenu timer = new JMenu("Timer");
 

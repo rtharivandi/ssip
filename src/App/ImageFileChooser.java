@@ -10,24 +10,24 @@ public class ImageFileChooser extends  JFileChooser {
 
     private String lastPath;
 
-    public ImageFileChooser() {
+
+    public ImageFileChooser(boolean hideFiles) {
         addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
         setAcceptAllFileFilterUsed(false);
         setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         setPreferredSize(new Dimension(1000, 800));
         setMultiSelectionEnabled(true);
-        setFileHidingEnabled(false);
+        setFileHidingEnabled(hideFiles);
     }
 
-    public ImageFileChooser(String s) {
+    public ImageFileChooser(boolean hideFiles, String s) {
         super(s);
         addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
         setAcceptAllFileFilterUsed(false);
         setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         setPreferredSize(new Dimension(1000, 800));
         setMultiSelectionEnabled(true);
-        setFileHidingEnabled(false);
-
+        setFileHidingEnabled(hideFiles);
     }
 
 }

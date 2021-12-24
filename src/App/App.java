@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.*;
 
 public class App extends JFrame {
@@ -25,6 +26,7 @@ public class App extends JFrame {
     private long timerTime = 2500;
 
     private String lastPath;
+    private boolean randomize = false;
 
     //Constructor
     public App() {
@@ -59,28 +61,24 @@ public class App extends JFrame {
     }
 
     //TODO: Fit the image to the windows
+    //TODO: Probably implement the random method in another method and not just an extention of this method
     void update() {
-        appLabel.setIcon(new ImageIcon(images.get(currentSlide).getAbsolutePath()));
-    }
-
-    void startTimer() {
-        //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
-        scheduledFuture = Executors.newScheduledThreadPool(1);
-        scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.MILLISECONDS);
-    }
-
-    void stopTimer() {
-        scheduledFuture.shutdown();
+        if (!randomize)
+            appLabel.setIcon(new ImageIcon(images.get(currentSlide).getAbsolutePath()));
+        else {
+            int random = new Random().nextInt(images.size() - 1);
+            appLabel.setIcon(new ImageIcon(images.get(random).getAbsolutePath()));
+        }
     }
 
     public void createAndShowGUI() {
         SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-                    | UnsupportedLookAndFeelException ex) {
-                ex.printStackTrace();
-            }
+//            try {
+//                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+//                    | UnsupportedLookAndFeelException ex) {
+//                ex.printStackTrace();
+//            }
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             pack();
             setLocationRelativeTo(null);
@@ -109,9 +107,9 @@ public class App extends JFrame {
 //        System.out.println("Please choose the path of the files.");
         JFileChooser chooser;
         if (lastPath == null) {
-            chooser = new ImageFileChooser();
+            chooser = new ImageFileChooser(false);
         } else {
-            chooser = new ImageFileChooser(lastPath);
+            chooser = new ImageFileChooser(false, lastPath);
 
         }
 
@@ -128,7 +126,9 @@ public class App extends JFrame {
             }
         }
 
-        lastPath = chooser.getSelectedFile().getParent();
+        if (chooser.getSelectedFile() != null)
+            lastPath = chooser.getSelectedFile().getParent();
+
     }
 
     private class ClickListener extends MouseAdapter {
@@ -167,6 +167,20 @@ public class App extends JFrame {
 
     boolean imagesEmpty() {
         return !images.isEmpty();
+    }
+
+    void startTimer() {
+        //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
+        scheduledFuture = Executors.newScheduledThreadPool(1);
+        scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.MILLISECONDS);
+    }
+
+    void stopTimer() {
+        scheduledFuture.shutdown();
+    }
+
+    void randomize() {
+        randomize = !randomize;
     }
 
 
