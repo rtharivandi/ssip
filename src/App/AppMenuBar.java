@@ -45,10 +45,8 @@ public class AppMenuBar extends JMenuBar {
         play.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
-                if (app.imagesEmpty())
+                if (app.imagesEmpty() && app.isScheduledFutureNull())
                     app.startTimer();
-
-
             }
 
             @Override

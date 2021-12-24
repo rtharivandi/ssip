@@ -60,25 +60,38 @@ public class App extends JFrame {
         update();
     }
 
-    //TODO: Fit the image to the windows
-    //TODO: Probably implement the random method in another method and not just an extention of this method
     void update() {
-        if (!randomize)
-            appLabel.setIcon(new ImageIcon(images.get(currentSlide).getAbsolutePath()));
-        else {
-            int random = new Random().nextInt(images.size() - 1);
-            appLabel.setIcon(new ImageIcon(images.get(random).getAbsolutePath()));
+        ImageIcon imageIcon;
+        if (!randomize) {
+            imageIcon = new ImageIcon(images.get(currentSlide).getAbsolutePath());
+        } else {
+            imageIcon = new ImageIcon(images.get(new Random().nextInt(images.size() - 1)).getAbsolutePath());
+        }
+        Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
+        appLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_SMOOTH)));
+    }
+
+    //Method almost works, there are still some pictures that does not fit the frame
+    private Dimension getFittingSize(int width, int height) {
+        //IsWider tells us if the picture is landcape or portrait
+        double aspectRatio = (double)width/height;
+        boolean isLandscape = aspectRatio > 1;
+
+        //In case it is landscape, the width has to be the same as the getWidth
+        //In case it is portrait, the height has to be the same as the getHeigth
+        //and then we make resize the other parameter accordingly
+
+        if (isLandscape) {
+            double div = (double) height/width;
+            return new Dimension(getWidth(), (int)(getWidth()*div));
+        } else {
+            double div = (double) width/height;
+            return new Dimension((int)(getHeight()*div), getHeight()-5);
         }
     }
 
     public void createAndShowGUI() {
         SwingUtilities.invokeLater(() -> {
-//            try {
-//                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-//                    | UnsupportedLookAndFeelException ex) {
-//                ex.printStackTrace();
-//            }
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             pack();
             setLocationRelativeTo(null);
@@ -104,7 +117,6 @@ public class App extends JFrame {
     }
 
     void selectFiles() {
-//        System.out.println("Please choose the path of the files.");
         JFileChooser chooser;
         if (lastPath == null) {
             chooser = new ImageFileChooser(false);
@@ -183,6 +195,9 @@ public class App extends JFrame {
         randomize = !randomize;
     }
 
+    boolean isTimerDown() {
+        return scheduledFuture.isShutdown();
+    }
 
 
 //    void setTimer(int seconds) {
