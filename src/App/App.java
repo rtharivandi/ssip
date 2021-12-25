@@ -19,45 +19,51 @@ public class App extends JFrame {
 
     private static int currentSlide = 0;
 
-    private static final JLabel appLabel = new JLabel();
+    private static final JLabel imageLabel = new JLabel();
     private static final ArrayList<File> images = new ArrayList<>();
 
     private ScheduledExecutorService scheduledFuture;
-    private long timerTime = 2500;
 
     private String lastPath;
     private boolean randomize = false;
 
     //Constructor
     public App() {
-        appLabel.setVerticalAlignment(JLabel.CENTER);
-        appLabel.setHorizontalAlignment(JLabel.CENTER);
-        appLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        //Setting up the JLabel for the images
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        imageLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+        imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        imageLabel.setIconTextGap(-45);
         setLayout(new BorderLayout());
-        add(appLabel, BorderLayout.CENTER);
+        add(imageLabel, BorderLayout.CENTER);
 
-        setJMenuBar(new AppMenuBar(this));
-
-        appLabel.addMouseListener(new ClickListener());
+        imageLabel.addMouseListener(new ClickListener());
 
         //Important for keyListener
-        appLabel.setFocusable(true);
-        appLabel.requestFocusInWindow();
-        appLabel.addKeyListener(new KeyPressListener());
+        imageLabel.setFocusable(true);
+        imageLabel.requestFocusInWindow();
+        imageLabel.addKeyListener(new KeyPressListener());
+
+        setJMenuBar(new AppMenuBar(this));
     }
 
     private void prevImage() {
-        if (currentSlide == 0)
-            currentSlide = images.size() - 1;
-        else
-            currentSlide = (currentSlide - 1) % images.size();
-        update();
+        if (images.size() != 0) {
+            if (currentSlide == 0)
+                currentSlide = images.size() - 1;
+            else
+                currentSlide = (currentSlide - 1) % images.size();
+            update();
+        }
     }
 
-
     private void nextImage() {
-        currentSlide = (currentSlide + 1) % images.size();
-        update();
+        if (images.size() != 0) {
+            currentSlide = (currentSlide + 1) % images.size();
+            update();
+        }
     }
 
     void update() {
@@ -66,21 +72,22 @@ public class App extends JFrame {
 
         if (!randomize) {
             path = images.get(currentSlide);
-//            imageIcon = new ImageIcon(images.get(currentSlide).getAbsolutePath());
         } else {
-//            imageIcon = new ImageIcon(images.get(new Random().nextInt(images.size())).getAbsolutePath());
             path = images.get(new Random().nextInt(images.size()));
         }
         imageIcon = new ImageIcon(path.getAbsolutePath());
-        if(path.getPath().substring(path.getPath().length()-4).equals(".gif")) {
-            appLabel.setIcon(imageIcon);
+        //This part is such a mess, find a way to clean it up
+        //For some reason, gifs just do not appear when using getScaledInstance
+        if(path.getPath().endsWith(".gif")) {
+            imageLabel.setIcon(imageIcon);
         } else {
             Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
-            appLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_AREA_AVERAGING)));
+            imageLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_AREA_AVERAGING)));
+            imageLabel.setText(path.getPath());
         }
     }
 
-    //Method almost works, there are still some pictures that does not fit the frame
+    //Method works 90% of the time, there are still some pictures that do not fit the frame
     private Dimension getFittingSize(int width, int height) {
         //IsWider tells us if the picture is landcape or portrait
         double aspectRatio = (double)width/height;
@@ -131,9 +138,7 @@ public class App extends JFrame {
             chooser = new ImageFileChooser(false);
         } else {
             chooser = new ImageFileChooser(false, lastPath);
-
         }
-
         int returnVal = chooser.showOpenDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = chooser.getSelectedFiles();
@@ -149,6 +154,7 @@ public class App extends JFrame {
 
         if (chooser.getSelectedFile() != null)
             lastPath = chooser.getSelectedFile().getParent();
+        imageLabel.setText(chooser.getSelectedFile().getPath() + " added!");
 
     }
 
@@ -180,19 +186,22 @@ public class App extends JFrame {
 
     void clearFiles() {
         images.clear();
+        imageLabel.setIcon(null);
+        imageLabel.setText("Images cleared!");
     }
 
     boolean isScheduledFutureNull() {
         return scheduledFuture == null;
     }
 
-    boolean imagesEmpty() {
+    boolean imagesNotEmpty() {
         return !images.isEmpty();
     }
 
     void startTimer() {
         //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
         scheduledFuture = Executors.newScheduledThreadPool(1);
+        long timerTime = 2500;
         scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.MILLISECONDS);
     }
 
@@ -207,59 +216,6 @@ public class App extends JFrame {
     boolean isTimerDown() {
         return scheduledFuture.isShutdown();
     }
-
-
-//    void setTimer(int seconds) {
-//        if (startWithTimer && !scheduledFuture.isShutdown())
-//            scheduledFuture.shutdown();
-//        else {
-//            timerTime = seconds;
-//            System.out.println("Timer succesfully set to " + timerTime + " seconds");
-//        }
-//    }
-
-//        public void start () {
-//            boolean isRunning = true;
-//            while (isRunning) {
-//                System.out.println("Please enter a command!");
-//                System.out.println("""
-//                        --------------------------------------------
-//                        p : Play the slideshow.
-//                        a : Add a new file.
-//                        c : Clear the queue
-//                        e: End the program
-//                        t: Set/Turn off a scheduled slideshow + (time in seconds)
-//                        --------------------------------------------""");
-//
-//                String[] commands = new Scanner(System.in).nextLine().split(" ");
-//                switch (commands[0]) {
-//                    case "a" -> selectFiles();
-//                    case "p" -> createAndShowGUI();
-//                    case "c" -> images.clear();
-//                    case "e" -> {
-//                        if (scheduledFuture != null)
-//                            scheduledFuture.shutdown();
-//                        isRunning = false;
-//                    }
-//                    case "t" -> {
-//                        if (startWithTimer && !scheduledFuture.isShutdown())
-//                            scheduledFuture.shutdown();
-//                        else if (commands.length < 2)
-//                            System.out.println("Enter the time in seconds!");
-//                        else {
-//                            String timer = commands[1];
-//                            if (timer.matches("^[+-]?\\d+$")) {
-//                                timerTime = Integer.parseInt(timer);
-//                                System.out.println("Timer succesfully set to " + timerTime + " seconds");
-//                                startWithTimer = true;
-//                            } else
-//                                System.out.println("Please enter a valid time in seconds.");
-//                        }
-//                    }
-//                    default -> System.out.println("Please enter a valid command!");
-//                }
-//            }
-//        }
 
 }
 

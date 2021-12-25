@@ -5,6 +5,8 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AppMenuBar extends JMenuBar {
 
@@ -25,7 +27,7 @@ public class AppMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 app.selectFiles();
-                if(app.imagesEmpty())
+                if(app.imagesNotEmpty())
                     app.update();
             }
         });
@@ -41,48 +43,34 @@ public class AppMenuBar extends JMenuBar {
         file.add(clearFiles);
         add(file);
 
-        JMenu play = new JMenu("Play");
-        play.addMenuListener(new MenuListener() {
+        //We should implement these ones with JMenuItem
+        JMenuItem play = new JMenu("Play");
+        play.addMouseListener(new MouseAdapter() {
             @Override
-            public void menuSelected(MenuEvent e) {
-                if (app.imagesEmpty() && app.isScheduledFutureNull())
-                    app.startTimer();
-            }
-
-            @Override
-            public void menuDeselected(MenuEvent e) {
-            }
-
-            @Override
-            public void menuCanceled(MenuEvent e) {
-                if (!app.isScheduledFutureNull())
+            public void mouseClicked(MouseEvent e) {
+                if (app.isScheduledFutureNull()) {
+                    try {
+                        app.startTimer();
+                    } catch (NullPointerException nullPointerException) {
+                        System.err.println("Please add a file!");
+                    }
+                } else {
                     app.stopTimer();
+                }
             }
         });
 
         add(play);
 
-        JMenu random = new JMenu("Random Slideshow");
-        random.addMenuListener(new MenuListener() {
+        JMenuItem random = new JMenu("Random Slideshow");
+        random.addMouseListener(new MouseAdapter() {
             @Override
-            public void menuSelected(MenuEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 app.randomize();
-            }
-
-            @Override
-            public void menuDeselected(MenuEvent e) {
-
-            }
-
-            @Override
-            public void menuCanceled(MenuEvent e) {
-
             }
         });
 
         add(random);
-
-
         JMenu timer = new JMenu("Timer");
 
 //        setPreferredSize(new Dimension(getWidth(), getHeight()));
