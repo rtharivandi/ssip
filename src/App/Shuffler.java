@@ -91,7 +91,7 @@ public class Shuffler {
         folders.add(new FolderShuffleInfo());
     }
 
-    public String clearImages(int index) {
+    public String clearImages() {
         if (!folders.isEmpty()){
             String parent = folders.get(currentFolder).getParentFile();
             folders.remove(currentFolder);

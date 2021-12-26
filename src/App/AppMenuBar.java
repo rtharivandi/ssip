@@ -13,17 +13,13 @@ public class AppMenuBar extends JMenuBar {
 
         addFiles.addActionListener(e -> {
             app.selectFiles();
-            if(!app.imagesEmpty())
-                app.start();
+            app.start();
         });
-
         clearFiles.addActionListener(e -> app.clearFiles());
-
         file.add(addFiles);
         file.add(clearFiles);
         add(file);
 
-        //We should implement these ones with JMenuItem
         JMenu play = new JMenu("Play");
         play.addMouseListener(new MouseAdapter() {
             @Override
@@ -49,7 +45,6 @@ public class AppMenuBar extends JMenuBar {
                 app.randomize();
             }
         });
-
         add(random);
 
         JMenu shuffle = new JMenu("Shuffle");
@@ -59,7 +54,6 @@ public class AppMenuBar extends JMenuBar {
                 app.switchShuffle();
             }
         });
-
         add(shuffle);
 
         JMenu loop = new JMenu("Loop");
@@ -69,7 +63,6 @@ public class AppMenuBar extends JMenuBar {
                 app.loop();
             }
         });
-
         add(loop);
 
 

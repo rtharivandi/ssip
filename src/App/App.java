@@ -26,14 +26,16 @@ public class App extends JFrame {
 
     private boolean timerIsRunning = false;
 
-    //Constructor
     public App() {
         //Setting up the JLabel for the images
         imageLabel.setVerticalAlignment(JLabel.CENTER);
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+
         imageLabel.setHorizontalTextPosition(JLabel.CENTER);
         imageLabel.setVerticalTextPosition(JLabel.CENTER);
+        imageLabel.setForeground(Color.BLACK);
+
         setLayout(new BorderLayout());
         add(imageLabel, BorderLayout.CENTER);
 
@@ -66,7 +68,7 @@ public class App extends JFrame {
     }
 
     void start() {
-        if (shuffler.getNumberOfFolders() == 1)
+        if(imageLabel.getIcon() == null)
             nextImage();
     }
 
@@ -168,7 +170,7 @@ public class App extends JFrame {
     }
 
     void clearFiles() {
-        String parent = shuffler.clearImages(shuffler.getCurrentFolder());
+        String parent = shuffler.clearImages();
         if (parent != null){
             imageLabel.setIcon(null);
             imageLabel.setText(parent + " cleared!");
