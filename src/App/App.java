@@ -47,13 +47,21 @@ public class App extends JFrame {
     }
 
     private void prevImage() {
-        File file = shuffle ? shuffler.getShuffledImagesPrev() : shuffler.getContinuousImagesPrev();
-        update(file);
+        try {
+            File file = shuffle ? shuffler.getShuffledImagesPrev() : shuffler.getContinuousImagesPrev();
+            update(file);
+        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+            imageLabel.setText("No images to show.");
+        }
     }
 
     private void nextImage() {
-        File file = shuffle ? shuffler.getShuffledImagesNext() : shuffler.getContinuousImagesNext();
-        update(file);
+        try {
+            File file = shuffle ? shuffler.getShuffledImagesNext() : shuffler.getContinuousImagesNext();
+            update(file);
+        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+            imageLabel.setText("No images to show.");
+        }
     }
 
     void start() {
@@ -158,9 +166,13 @@ public class App extends JFrame {
     }
 
     void clearFiles() {
-        shuffler.clearImages(shuffler.getCurrentFolder());
-        imageLabel.setIcon(null);
-        imageLabel.setText("Images cleared!");
+        String parent = shuffler.clearImages(shuffler.getCurrentFolder());
+        if (parent != null){
+            imageLabel.setIcon(null);
+            imageLabel.setText(parent + " cleared!");
+        } else {
+            imageLabel.setText("No images to clear.");
+        }
     }
 
     boolean imagesEmpty() {

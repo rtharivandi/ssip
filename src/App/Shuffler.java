@@ -15,31 +15,30 @@ public class Shuffler {
     }
 
     public File getShuffledImagesNext() {
+        currentFolder = randomize ? new Random().nextInt(folders.size()) : (currentFolder + 1) % folders.size();
+
         FolderShuffleInfo temp = folders.get(currentFolder);
-        currentFolder = randomize ? new Random().nextInt(folders.size()) : (currentFolder + 1)%folders.size();
         int imageIndex = randomize ? new Random().nextInt(temp.getSize()) : (temp.getCurrent() + 1)%temp.getSize();
 
-        File toReturn = temp.getImage(imageIndex);
         temp.setCurrent(imageIndex);
-
-        return toReturn;
+        return temp.getImage(imageIndex);
     }
 
     public File getShuffledImagesPrev() {
-        FolderShuffleInfo temp = folders.get(currentFolder);
         currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder - 1;
-        currentFolder = currentFolder == -1 ? 0 : currentFolder;
+        currentFolder = currentFolder == -1 ? folders.size()-1 : currentFolder;
+
+        FolderShuffleInfo temp = folders.get(currentFolder);
         int imageIndex = randomize ? new Random().nextInt(temp.getSize()) : temp.getCurrent() - 1;
 
-        File toReturn = temp.getImage(imageIndex);
         temp.setCurrent(imageIndex == -1 ? temp.getSize()-1 : imageIndex);
-
-        return toReturn;
+        return temp.getImage(temp.getCurrent());
     }
 
     public File getContinuousImagesNext() {
-        FolderShuffleInfo temp = folders.get(currentFolder);
         currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder;
+
+        FolderShuffleInfo temp = folders.get(currentFolder);
         int imageIndex = randomize ? new Random().nextInt(temp.getSize()) : (temp.getCurrent() + 1)%temp.getSize();
 
         File toReturn = temp.getImage(imageIndex);
@@ -49,8 +48,9 @@ public class Shuffler {
     }
 
     public File getContinuousImagesPrev() {
-        FolderShuffleInfo temp = folders.get(currentFolder);
         currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder;
+
+        FolderShuffleInfo temp = folders.get(currentFolder);
         int imageIndex = randomize ? new Random().nextInt(temp.getSize()) : temp.getCurrent() - 1;
 
         temp.setCurrent(imageIndex == -1 ? temp.getSize()-1 : imageIndex);
@@ -75,8 +75,13 @@ public class Shuffler {
         folders.add(new FolderShuffleInfo());
     }
 
-    public void clearImages(int index) {
-        folders.get(index).clearImages();
+    public String clearImages(int index) {
+        if (!folders.isEmpty()){
+            String parent = folders.get(currentFolder).getParentFile();
+            folders.remove(currentFolder);
+            return parent;
+        }
+        return null;
     }
 
     public int getCurrentFolder() {

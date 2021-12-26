@@ -4,7 +4,7 @@ import App.SlideshowTimer;
 import javax.swing.*;
 
 public class Menu {
-    
+
     public static void main(String[] args) {
         App app = new App();
         app.setTitle("SSIP Pre-Alpha");

@@ -51,4 +51,8 @@ public class FolderShuffleInfo {
     public boolean isEmpty() {
         return images.isEmpty();
     }
+
+    public String getParentFile() {
+        return images.get(0).getParent();
+    }
 }
