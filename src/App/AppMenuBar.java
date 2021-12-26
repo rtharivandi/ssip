@@ -1,22 +1,10 @@
 package App;
 
 import javax.swing.*;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class AppMenuBar extends JMenuBar {
-
-//    @Override
-//    protected void paintComponent(Graphics g) {
-//        super.paintComponent(g);
-//        Graphics2D gd = (Graphics2D) g;
-//        gd.setColor(Color.gray);
-//        gd.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
-//    }
 
     public AppMenuBar(App app) {
         JMenu file = new JMenu("File");
