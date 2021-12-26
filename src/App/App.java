@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class App extends JFrame {
 
@@ -15,9 +18,12 @@ public class App extends JFrame {
     private static final Shuffler shuffler = new Shuffler();
 
     private final SlideshowTimer slideshowTimer = new SlideshowTimer();
+    private final ScheduledExecutorService slideshowTime = Executors.newScheduledThreadPool(1);
 
     private String lastPath;
     private boolean shuffle = false;
+
+    private boolean timerIsRunning = false;
 
     //Constructor
     public App() {
@@ -157,8 +163,8 @@ public class App extends JFrame {
         imageLabel.setText("Images cleared!");
     }
 
-    boolean imagesNotEmpty() {
-        return shuffler.isNotEmpty();
+    boolean imagesEmpty() {
+        return shuffler.isEmpty();
     }
 
     public SlideshowTimer getSlideshowTimer() {
@@ -166,16 +172,23 @@ public class App extends JFrame {
     }
 
     void startTimer() {
-        if (!shuffler.isNotEmpty())
+        if (shuffler.isEmpty())
             imageLabel.setText("Please insert images!");
         else {
-            slideshowTimer.startTimer(this::nextImage);
+            slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
+            imageLabel.setText("Slideshow started!");
+            timerIsRunning = true;
         }
     }
 
     void stopTimer() {
-        slideshowTimer.stopTimer();
+        slideshowTime.shutdown();
         imageLabel.setText("Slideshow paused!");
+        timerIsRunning = false;
+    }
+
+    boolean isTimerDown() {
+        return timerIsRunning;
     }
 
     void randomize() {
@@ -191,6 +204,8 @@ public class App extends JFrame {
     }
 
 }
+
+
 
 
 

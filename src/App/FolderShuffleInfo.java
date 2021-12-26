@@ -48,7 +48,7 @@ public class FolderShuffleInfo {
         return images.size();
     }
 
-    public boolean imagesNotEmpty() {
-        return !images.isEmpty();
+    public boolean isEmpty() {
+        return images.isEmpty();
     }
 }

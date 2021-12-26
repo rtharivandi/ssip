@@ -13,7 +13,7 @@ public class AppMenuBar extends JMenuBar {
 
         addFiles.addActionListener(e -> {
             app.selectFiles();
-            if(!app.imagesNotEmpty())
+            if(!app.imagesEmpty())
                 app.start();
         });
 
@@ -28,7 +28,7 @@ public class AppMenuBar extends JMenuBar {
         play.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (app.getSlideshowTimer().isTimerDown()) {
+                if (!app.isTimerDown()) {
                     try {
                         app.startTimer();
                     } catch (NullPointerException nullPointerException) {

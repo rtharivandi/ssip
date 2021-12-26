@@ -83,7 +83,7 @@ public class Shuffler {
         return currentFolder;
     }
 
-    public boolean isNotEmpty() {
-        return folders.get(currentFolder).imagesNotEmpty();
+    public boolean isEmpty() {
+        return folders.isEmpty();
     }
 }
