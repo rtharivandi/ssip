@@ -6,6 +6,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,7 @@ public class App extends JFrame {
     private static final Shuffler shuffler = new Shuffler();
 
     private final ScheduledExecutorService slideshowTime = Executors.newScheduledThreadPool(1);
+    private Future<?> future = null;
 
     private String lastPath;
     private boolean shuffle = false;
@@ -183,14 +185,14 @@ public class App extends JFrame {
         if (shuffler.isEmpty())
             imageLabel.setText("No images to play. Please insert images!");
         else {
-            slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
+            future = slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
             imageLabel.setText("Slideshow started!");
             timerIsRunning = true;
         }
     }
 
     void stopTimer() {
-        slideshowTime.shutdown();
+        future.cancel(true);
         imageLabel.setText("Slideshow paused!");
         timerIsRunning = false;
     }
