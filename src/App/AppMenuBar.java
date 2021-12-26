@@ -25,7 +25,7 @@ public class AppMenuBar extends JMenuBar {
 
         addFiles.addActionListener(e -> {
             app.selectFiles();
-            if(app.imagesNotEmpty())
+            if(!app.imagesNotEmpty())
                 app.start();
         });
 

@@ -28,7 +28,7 @@ public class Shuffler {
     public File getShuffledImagesPrev() {
         FolderShuffleInfo temp = folders.get(currentFolder);
         currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder - 1;
-        currentFolder = currentFolder == 1 ? 0 : currentFolder;
+        currentFolder = currentFolder == -1 ? 0 : currentFolder;
         int imageIndex = randomize ? new Random().nextInt(temp.getSize()) : temp.getCurrent() - 1;
 
         File toReturn = temp.getImage(imageIndex);
