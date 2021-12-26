@@ -9,23 +9,19 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.*;
 
 public class App extends JFrame {
 
     private final static int WIDTH = 1080;
     private final static int HEIGHT = 1080;
 
-    private static int currentSlide = 0;
+    protected static final JLabel imageLabel = new JLabel();
+    private static final Shuffler shuffler = new Shuffler();
 
-    private static final JLabel imageLabel = new JLabel();
-    private static final ArrayList<File> images = new ArrayList<>();
-
-    private ScheduledExecutorService scheduledFuture;
+    private final SlideshowTimer slideshowTimer = new SlideshowTimer();
 
     private String lastPath;
-    private boolean randomize = false;
+    private boolean shuffle = false;
 
     //Constructor
     public App() {
@@ -34,8 +30,7 @@ public class App extends JFrame {
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
         imageLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-        imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
-        imageLabel.setIconTextGap(-45);
+        imageLabel.setVerticalTextPosition(JLabel.CENTER);
         setLayout(new BorderLayout());
         add(imageLabel, BorderLayout.CENTER);
 
@@ -50,59 +45,42 @@ public class App extends JFrame {
     }
 
     private void prevImage() {
-        if (images.size() != 0) {
-            if (currentSlide == 0)
-                currentSlide = images.size() - 1;
-            else
-                currentSlide = (currentSlide - 1) % images.size();
-            update();
-        }
+        File file = shuffle ? shuffler.getShuffledImagesPrev() : shuffler.getContinuousImagesPrev();
+        update(file);
     }
 
     private void nextImage() {
-        if (images.size() != 0) {
-            currentSlide = (currentSlide + 1) % images.size();
-            update();
-        }
+        File file = shuffle ? shuffler.getShuffledImagesNext() : shuffler.getContinuousImagesNext();
+        update(file);
     }
 
-    void update() {
-        ImageIcon imageIcon;
-        File path;
+    void start() {
+        nextImage();
+    }
 
-        if (!randomize) {
-            path = images.get(currentSlide);
-        } else {
-            path = images.get(new Random().nextInt(images.size()));
-        }
-        imageIcon = new ImageIcon(path.getAbsolutePath());
-        //This part is such a mess, find a way to clean it up
-        //For some reason, gifs just do not appear when using getScaledInstance
-        if(path.getPath().endsWith(".gif")) {
+    void update(File file) {
+        ImageIcon imageIcon = new ImageIcon(file.getAbsolutePath());
+
+        if (file.getPath().endsWith(".gif")) {
             imageLabel.setIcon(imageIcon);
         } else {
             Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
-            imageLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_AREA_AVERAGING)));
-            imageLabel.setText(path.getPath());
+            imageLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_SMOOTH)));
+            imageLabel.setText(file.getPath());
         }
     }
 
     //Method works 90% of the time, there are still some pictures that do not fit the frame
     private Dimension getFittingSize(int width, int height) {
-        //IsWider tells us if the picture is landcape or portrait
-        double aspectRatio = (double)width/height;
+        double aspectRatio = (double) width / height;
         boolean isLandscape = aspectRatio > 1;
 
-        //In case it is landscape, the width has to be the same as the getWidth
-        //In case it is portrait, the height has to be the same as the getHeigth
-        //and then we make resize the other parameter accordingly
-
         if (isLandscape) {
-            double div = (double) height/width;
-            return new Dimension(getWidth(), (int)(getWidth()*div));
+            double div = (double) height / width;
+            return new Dimension(getWidth(), (int) (getWidth() * div));
         } else {
-            double div = (double) width/height;
-            return new Dimension((int)(getHeight()*div), getHeight()-5);
+            double div = (double) width / height;
+            return new Dimension((int) (getHeight() * div), getHeight());
         }
     }
 
@@ -117,44 +95,37 @@ public class App extends JFrame {
 
     private void insertFiles(File file) throws IOException {
         if (file.isDirectory()) {
-            images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
-            images.removeIf(App::isNotImage);
-        } else if (file.isFile() && !isNotImage(file)) {
-            images.add(file);
-        }
-    }
-
-    private static boolean isNotImage(File file) {
-        try {
-            return !Files.probeContentType(file.toPath()).split("/")[0].equals("image");
-        } catch (IOException | NullPointerException e) {
-            return false;
+            shuffler.addNewFolder();
+            shuffler.addImage(file);
+        } else if (file.isFile()) {
+            shuffler.addImage(file);
         }
     }
 
     void selectFiles() {
         JFileChooser chooser;
-        if (lastPath == null) {
+        if (lastPath == null)
             chooser = new ImageFileChooser(false);
-        } else {
+        else
             chooser = new ImageFileChooser(false, lastPath);
-        }
+
         int returnVal = chooser.showOpenDialog(null);
+
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File[] files = chooser.getSelectedFiles();
             for (File file : files) {
                 try {
                     insertFiles(file);
-                    System.out.println("File '" + file.getAbsolutePath() + "' succesfully added.\n");
                 } catch (IOException e) {
-                    System.out.println("Error. Please try again.\n");
+                    e.printStackTrace();
                 }
             }
         }
 
-        if (chooser.getSelectedFile() != null)
+        if (chooser.getSelectedFile() != null) {
             lastPath = chooser.getSelectedFile().getParent();
-        imageLabel.setText(chooser.getSelectedFile().getPath() + " added!");
+            imageLabel.setText(chooser.getSelectedFile().getPath() + " added!");
+        }
 
     }
 
@@ -185,36 +156,42 @@ public class App extends JFrame {
     }
 
     void clearFiles() {
-        images.clear();
+        shuffler.clearImages(shuffler.getCurrentFolder());
         imageLabel.setIcon(null);
         imageLabel.setText("Images cleared!");
     }
 
-    boolean isScheduledFutureNull() {
-        return scheduledFuture == null;
+    boolean imagesNotEmpty() {
+        return shuffler.isNotEmpty();
     }
 
-    boolean imagesNotEmpty() {
-        return !images.isEmpty();
+    public SlideshowTimer getSlideshowTimer() {
+        return slideshowTimer;
     }
 
     void startTimer() {
-        //Creates a thread pool that can schedule commands to run after a given delay, or to execute periodically.
-        scheduledFuture = Executors.newScheduledThreadPool(1);
-        long timerTime = 2500;
-        scheduledFuture.scheduleAtFixedRate(this::nextImage, timerTime, timerTime, TimeUnit.MILLISECONDS);
+        if (!shuffler.isNotEmpty())
+            imageLabel.setText("Please insert images!");
+        else {
+            slideshowTimer.startTimer(this::nextImage);
+        }
     }
 
     void stopTimer() {
-        scheduledFuture.shutdown();
+        slideshowTimer.stopTimer();
+        imageLabel.setText("Slideshow paused!");
     }
 
     void randomize() {
-        randomize = !randomize;
+        boolean randomized = shuffler.randomize();
+        String message = randomized ? "enabled" : "disabled";
+        imageLabel.setText("Random slideshow is " + message);
     }
 
-    boolean isTimerDown() {
-        return scheduledFuture.isShutdown();
+    void switchShuffle() {
+        shuffle = !shuffle;
+        String message = shuffle ? "enabled" : "disabled";
+        imageLabel.setText("Shuffle is " + message);
     }
 
 }

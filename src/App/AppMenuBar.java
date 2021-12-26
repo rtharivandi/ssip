@@ -23,21 +23,13 @@ public class AppMenuBar extends JMenuBar {
         JMenuItem addFiles = new JMenuItem("Add file(s)");
         JMenuItem clearFiles = new JMenuItem("Clear files");
 
-        addFiles.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                app.selectFiles();
-                if(app.imagesNotEmpty())
-                    app.update();
-            }
+        addFiles.addActionListener(e -> {
+            app.selectFiles();
+            if(app.imagesNotEmpty())
+                app.start();
         });
 
-        clearFiles.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                app.clearFiles();
-            }
-        });
+        clearFiles.addActionListener(e -> app.clearFiles());
 
         file.add(addFiles);
         file.add(clearFiles);
@@ -48,7 +40,7 @@ public class AppMenuBar extends JMenuBar {
         play.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (app.isScheduledFutureNull()) {
+                if (app.getSlideshowTimer().isTimerDown()) {
                     try {
                         app.startTimer();
                     } catch (NullPointerException nullPointerException) {
@@ -62,7 +54,7 @@ public class AppMenuBar extends JMenuBar {
 
         add(play);
 
-        JMenuItem random = new JMenu("Random Slideshow");
+        JMenuItem random = new JMenu("Random");
         random.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -71,8 +63,17 @@ public class AppMenuBar extends JMenuBar {
         });
 
         add(random);
-        JMenu timer = new JMenu("Timer");
 
-//        setPreferredSize(new Dimension(getWidth(), getHeight()));
+        JMenuItem shuffle = new JMenu("Shuffle");
+        shuffle.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                app.switchShuffle();
+            }
+        });
+
+        add(shuffle);
+
+
     }
 }
