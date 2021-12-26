@@ -24,7 +24,7 @@ public class AppMenuBar extends JMenuBar {
         add(file);
 
         //We should implement these ones with JMenuItem
-        JMenuItem play = new JMenu("Play");
+        JMenu play = new JMenu("Play");
         play.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -42,7 +42,7 @@ public class AppMenuBar extends JMenuBar {
 
         add(play);
 
-        JMenuItem random = new JMenu("Random");
+        JMenu random = new JMenu("Random");
         random.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -52,7 +52,7 @@ public class AppMenuBar extends JMenuBar {
 
         add(random);
 
-        JMenuItem shuffle = new JMenu("Shuffle");
+        JMenu shuffle = new JMenu("Shuffle");
         shuffle.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -61,6 +61,16 @@ public class AppMenuBar extends JMenuBar {
         });
 
         add(shuffle);
+
+        JMenu loop = new JMenu("Loop");
+        loop.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                app.loop();
+            }
+        });
+
+        add(loop);
 
 
     }

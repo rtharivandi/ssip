@@ -17,7 +17,6 @@ public class App extends JFrame {
     protected static final JLabel imageLabel = new JLabel();
     private static final Shuffler shuffler = new Shuffler();
 
-    private final SlideshowTimer slideshowTimer = new SlideshowTimer();
     private final ScheduledExecutorService slideshowTime = Executors.newScheduledThreadPool(1);
 
     private String lastPath;
@@ -50,7 +49,7 @@ public class App extends JFrame {
         try {
             File file = shuffle ? shuffler.getShuffledImagesPrev() : shuffler.getContinuousImagesPrev();
             update(file);
-        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e) {
             imageLabel.setText("No images to show.");
         }
     }
@@ -59,13 +58,14 @@ public class App extends JFrame {
         try {
             File file = shuffle ? shuffler.getShuffledImagesNext() : shuffler.getContinuousImagesNext();
             update(file);
-        } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e) {
             imageLabel.setText("No images to show.");
         }
     }
 
     void start() {
-        nextImage();
+        if (shuffler.getNumberOfFolders() == 1)
+            nextImage();
     }
 
     void update(File file) {
@@ -179,13 +179,9 @@ public class App extends JFrame {
         return shuffler.isEmpty();
     }
 
-    public SlideshowTimer getSlideshowTimer() {
-        return slideshowTimer;
-    }
-
     void startTimer() {
         if (shuffler.isEmpty())
-            imageLabel.setText("Please insert images!");
+            imageLabel.setText("No images to play. Please insert images!");
         else {
             slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
             imageLabel.setText("Slideshow started!");
@@ -215,6 +211,11 @@ public class App extends JFrame {
         imageLabel.setText("Shuffle is " + message);
     }
 
+    void loop() {
+        boolean loop = shuffler.loop();
+        String message = loop ? "enabled" : "disabled";
+        imageLabel.setText("Looped slideshow is " + message);
+    }
 }
 
 

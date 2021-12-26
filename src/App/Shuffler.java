@@ -8,6 +8,7 @@ public class Shuffler {
     private final ArrayList<FolderShuffleInfo> folders;
     private int currentFolder;
     private boolean randomize = false;
+    private boolean loop = false;
 
     public Shuffler() {
         this.folders = new ArrayList<>();
@@ -44,6 +45,11 @@ public class Shuffler {
         File toReturn = temp.getImage(imageIndex);
         temp.setCurrent(imageIndex);
 
+        if (!loop) {
+            if (imageIndex == temp.getSize() - 1)
+                currentFolder = (currentFolder + 1) % folders.size();
+        }
+
         return toReturn;
     }
 
@@ -55,12 +61,22 @@ public class Shuffler {
 
         temp.setCurrent(imageIndex == -1 ? temp.getSize()-1 : imageIndex);
 
+        if (!loop){
+            if (imageIndex == 0)
+                currentFolder = currentFolder == 0 ? folders.size() - 1 : currentFolder - 1;
+        }
+
         return temp.getImage(temp.getCurrent());
     }
 
     public boolean randomize() {
         randomize = !randomize;
         return randomize;
+    }
+
+    public boolean loop() {
+        loop = !loop;
+        return loop;
     }
 
     public void addImage(int folderIndex, File file) {
@@ -90,5 +106,9 @@ public class Shuffler {
 
     public boolean isEmpty() {
         return folders.isEmpty();
+    }
+
+    public int getNumberOfFolders(){
+        return folders.size();
     }
 }
