@@ -21,7 +21,8 @@ Let the program surprise you which image comes next.
 Let's say you've added multiple folders, and then you'd like to see one pic from one folder, then one from the next, and then one from the next.
 You get the point. Just click on the "Shuffle" button, and you can either navigate through the slideshow yourself, or let the program do the work (just click play)!
 
-# Some other features I'd love to add in the future
+# Upcoming Features
+Some other features I'm either developing or planning to.
 You know what they say, a developer is never done with a project. They'll keep adding new stuff into it.
 
 ## Order your own slideshow
