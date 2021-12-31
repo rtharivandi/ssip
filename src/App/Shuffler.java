@@ -80,10 +80,11 @@ public class Shuffler {
     }
 
     public void addImage(int folderIndex, File file) {
-        folders.get(folderIndex).addImage(file);
     }
 
     public void addImage(File file) {
+        if (folders.size() == 0)
+            folders.add(new FolderShuffleInfo());
         folders.get(folders.size()-1).addImage(file);
     }
 

@@ -1,5 +1,4 @@
 import App.App;
-import App.SlideshowTimer;
 
 import javax.swing.*;
 

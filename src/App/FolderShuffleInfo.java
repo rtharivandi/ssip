@@ -20,7 +20,10 @@ public class FolderShuffleInfo {
     }
 
     public void addImage(File file) {
-        images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
+        if (file.isDirectory())
+            images.addAll(Arrays.asList(Objects.requireNonNull(file.listFiles())));
+        else
+            images.add(file);
         images.removeIf(this::isNotImage);
     }
 
