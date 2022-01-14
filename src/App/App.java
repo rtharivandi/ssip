@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -16,9 +18,9 @@ public class App extends JFrame {
     private final static int HEIGHT = 1080;
 
     protected static final JLabel imageLabel = new JLabel();
-    private static final Shuffler shuffler = new Shuffler();
 
     private final ScheduledExecutorService slideshowTime = Executors.newScheduledThreadPool(1);
+    private final ArrayList<FolderShuffleInfo> folders = new ArrayList<>();
     private Future<?> future = null;
 
     private String lastPath;
@@ -34,10 +36,11 @@ public class App extends JFrame {
 
         imageLabel.setHorizontalTextPosition(JLabel.CENTER);
         imageLabel.setVerticalTextPosition(JLabel.CENTER);
-        imageLabel.setForeground(Color.BLACK);
+        imageLabel.setForeground(Color.WHITE);
 
         setLayout(new BorderLayout());
         add(imageLabel, BorderLayout.CENTER);
+        getContentPane().setBackground(Color.BLACK);
 
         imageLabel.addMouseListener(new ClickListener());
 
@@ -51,7 +54,7 @@ public class App extends JFrame {
 
     private void prevImage() {
         try {
-            File file = shuffle ? shuffler.getShuffledImagesPrev() : shuffler.getContinuousImagesPrev();
+            String file = shuffle ? getShuffledImagesPrev() : getContinuousImagesPrev();
             update(file);
         } catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e) {
             imageLabel.setText("No images to show.");
@@ -60,7 +63,7 @@ public class App extends JFrame {
 
     private void nextImage() {
         try {
-            File file = shuffle ? shuffler.getShuffledImagesNext() : shuffler.getContinuousImagesNext();
+            String file = shuffle ? getShuffledImagesNext() : getContinuousImagesNext();
             update(file);
         } catch (IndexOutOfBoundsException | IllegalArgumentException | ArithmeticException e) {
             imageLabel.setText("No images to show.");
@@ -68,35 +71,31 @@ public class App extends JFrame {
     }
 
     void start() {
-        if(imageLabel.getIcon() == null)
+        if (imageLabel.getIcon() == null)
             nextImage();
     }
 
-    void update(File file) {
-        ImageIcon imageIcon = new ImageIcon(file.getAbsolutePath());
+    void update(String file) {
+        imageLabel.setIcon(getFittingSize(new ImageIcon(file), getWidth(), getHeight()));
 
-        if (file.getPath().endsWith(".gif")) {
-            imageLabel.setIcon(imageIcon);
-        } else {
-            Dimension dim = getFittingSize(imageIcon.getIconWidth(), imageIcon.getIconHeight());
-            imageLabel.setIcon(new ImageIcon(imageIcon.getImage().getScaledInstance(dim.width, dim.height, Image.SCALE_SMOOTH)));
-            imageLabel.setText(file.getPath());
-        }
     }
 
     //Method works 90% of the time, there are still some pictures that do not fit the frame
-    private Dimension getFittingSize(int width, int height) {
-        double aspectRatio = (double) width / height;
-        boolean isLandscape = aspectRatio > 1;
+    //Moral of the story, REDUCE THE AMOUNT OF FLOATING POINT NUMBER CALCULATIONS AND ENCAPSULATION
+    private ImageIcon getFittingSize(ImageIcon imageIcon, int width, int height) {
+        int newWidth = imageIcon.getIconWidth();
+        int newHeight = imageIcon.getIconHeight();
 
-        if (isLandscape) {
-            double div = (double) height / width;
-            return new Dimension(getWidth(), (int) (getWidth() * div));
+        if (newWidth > width) {
+            newWidth = width;
+            newHeight = (newWidth * imageIcon.getIconHeight()) / imageIcon.getIconWidth();
         } else {
-            double div = (double) width / height;
-            return new Dimension((int) (getHeight() * div), getHeight());
+            newHeight = height;
+            newWidth = (newHeight * imageIcon.getIconWidth()) / imageIcon.getIconHeight();
         }
+        return new ImageIcon(imageIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT));
     }
+
 
     public void createAndShowGUI() {
         SwingUtilities.invokeLater(() -> {
@@ -109,10 +108,10 @@ public class App extends JFrame {
 
     private void insertFiles(File file) throws IOException {
         if (file.isDirectory()) {
-            shuffler.addNewFolder();
-            shuffler.addImage(file);
+            addNewFolder();
+            addImage(file);
         } else if (file.isFile()) {
-            shuffler.addImage(file);
+            addImage(file);
         }
     }
 
@@ -157,8 +156,7 @@ public class App extends JFrame {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            int keyCode = e.getKeyCode();
-            switch (keyCode) {
+            switch (e.getKeyCode()) {
                 case KeyEvent.VK_LEFT -> prevImage();
                 case KeyEvent.VK_RIGHT -> nextImage();
             }
@@ -170,8 +168,8 @@ public class App extends JFrame {
     }
 
     void clearFiles() {
-        String parent = shuffler.clearImages();
-        if (parent != null){
+        String parent = clearImages();
+        if (parent != null) {
             imageLabel.setIcon(null);
             imageLabel.setText(parent + " cleared!");
         } else {
@@ -180,14 +178,14 @@ public class App extends JFrame {
     }
 
     boolean imagesEmpty() {
-        return shuffler.isEmpty();
+        return isEmpty();
     }
 
     void startTimer() {
-        if (shuffler.isEmpty())
+        if (isEmpty())
             imageLabel.setText("No images to play. Please insert images!");
         else {
-            future = slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
+            future = slideshowTime.scheduleAtFixedRate(this::nextImage, 100, 100, TimeUnit.MILLISECONDS);
             imageLabel.setText("Slideshow started!");
             timerIsRunning = true;
         }
@@ -199,13 +197,17 @@ public class App extends JFrame {
         timerIsRunning = false;
     }
 
+    private int currentFolder;
+    private boolean randomize = false;
+    private boolean loop = false;
+
     boolean isTimerDown() {
         return timerIsRunning;
     }
 
-    void randomize() {
-        boolean randomized = shuffler.randomize();
-        String message = randomized ? "enabled" : "disabled";
+    void switchRandomize() {
+        randomize = !randomize;
+        String message = randomize ? "enabled" : "disabled";
         imageLabel.setText("Random slideshow is " + message);
     }
 
@@ -215,11 +217,80 @@ public class App extends JFrame {
         imageLabel.setText("Shuffle is " + message);
     }
 
-    void loop() {
-        boolean loop = shuffler.loop();
+    void switchLoop() {
+        loop = !loop;
         String message = loop ? "enabled" : "disabled";
         imageLabel.setText("Looped slideshow is " + message);
     }
+
+    public String getShuffledImagesNext() {
+        return getFolderShuffleInfoShuffled(true);
+    }
+
+    public String getShuffledImagesPrev() {
+        return getFolderShuffleInfoShuffled(false);
+    }
+
+    private String getFolderShuffleInfoShuffled(boolean next) {
+        int foldersSize = folders.size();
+        currentFolder = randomize ? new Random().nextInt(foldersSize) : (next ? (currentFolder + 1) % foldersSize : currentFolder - 1);
+        if (currentFolder == -1)
+            currentFolder = foldersSize - 1;
+
+        FolderShuffleInfo temp = folders.get(currentFolder);
+        int tempSize = temp.getSize();
+        int imageIndex = randomize ? new Random().nextInt(tempSize) : (next ? (temp.getCurrent() + 1) % tempSize : temp.getCurrent() - 1);
+        if (imageIndex == -1)
+            imageIndex = tempSize - 1;
+        temp.setCurrent(imageIndex);
+        return temp.getImage(temp.getCurrent()).getAbsolutePath();
+    }
+
+    public String getContinuousImagesNext() {
+        return getFolderShuffleInfoContinuous(true);
+    }
+
+    public String getContinuousImagesPrev() {
+        return getFolderShuffleInfoContinuous(false);
+    }
+
+    private String getFolderShuffleInfoContinuous(boolean next) {
+        currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder;
+        FolderShuffleInfo temp = folders.get(currentFolder);
+        int size = temp.getSize();
+
+        int imageIndex = randomize ? (new Random().nextInt(size)) : (next ? (temp.getCurrent() + 1) % size : temp.getCurrent() - 1);
+        temp.setCurrent(imageIndex == -1 ? size - 1 : imageIndex);
+
+        if (!loop)
+            currentFolder = next ? (imageIndex == size - 1 ? (currentFolder + 1) % folders.size() : currentFolder) : (currentFolder == 0 ? folders.size() - 1 : currentFolder - 1);
+
+        return temp.getImage(temp.getCurrent()).getAbsolutePath();
+    }
+
+    public void addImage(File file) {
+        if (folders.size() == 0)
+            folders.add(new FolderShuffleInfo());
+        folders.get(folders.size() - 1).addImage(file);
+    }
+
+    public void addNewFolder() {
+        folders.add(new FolderShuffleInfo());
+    }
+
+    public String clearImages() {
+        if (!folders.isEmpty()) {
+            String parent = folders.get(currentFolder).getParentFile();
+            folders.remove(currentFolder);
+            return parent;
+        }
+        return null;
+    }
+
+    public boolean isEmpty() {
+        return folders.isEmpty();
+    }
+
 }
 
 

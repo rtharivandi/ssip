@@ -42,7 +42,7 @@ public class AppMenuBar extends JMenuBar {
         random.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                app.randomize();
+                app.switchRandomize();
             }
         });
         add(random);
@@ -60,7 +60,7 @@ public class AppMenuBar extends JMenuBar {
         loop.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                app.loop();
+                app.switchLoop();
             }
         });
         add(loop);
