@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class FolderShuffleInfo {
+public class Shuffler {
     private final ArrayList<File> images = new ArrayList<>();
     private int current;
 
-    public FolderShuffleInfo() {
+    public Shuffler() {
         current = 0;
     }
 
