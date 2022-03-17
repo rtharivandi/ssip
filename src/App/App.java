@@ -81,8 +81,6 @@ public class App extends JFrame {
         imageLabel.setText(file);
     }
 
-    //Method works 90% of the time, there are still some pictures that do not fit the frame
-    //Moral of the story, REDUCE THE AMOUNT OF FLOATING POINT NUMBER CALCULATIONS AND ENCAPSULATION
     private ImageIcon getFittingSize(ImageIcon imageIcon, int width, int height) {
         int newWidth = imageIcon.getIconWidth();
         int newHeight = imageIcon.getIconHeight();
