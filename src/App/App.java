@@ -35,7 +35,8 @@ public class App extends JFrame {
         imageLabel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
         imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-        imageLabel.setVerticalTextPosition(JLabel.CENTER);
+        imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        imageLabel.setIconTextGap(-45);
         imageLabel.setForeground(Color.WHITE);
 
         setLayout(new BorderLayout());
@@ -77,7 +78,7 @@ public class App extends JFrame {
 
     void update(String file) {
         imageLabel.setIcon(getFittingSize(new ImageIcon(file), getWidth(), getHeight()));
-
+        imageLabel.setText(file);
     }
 
     //Method works 90% of the time, there are still some pictures that do not fit the frame
@@ -185,7 +186,7 @@ public class App extends JFrame {
         if (isEmpty())
             imageLabel.setText("No images to play. Please insert images!");
         else {
-            future = slideshowTime.scheduleAtFixedRate(this::nextImage, 100, 100, TimeUnit.MILLISECONDS);
+            future = slideshowTime.scheduleAtFixedRate(this::nextImage, 2500, 2500, TimeUnit.MILLISECONDS);
             imageLabel.setText("Slideshow started!");
             timerIsRunning = true;
         }
