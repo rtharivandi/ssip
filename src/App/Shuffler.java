@@ -1,38 +1,5 @@
 package App;
 
-<<<<<<< HEAD
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
-
-public class Shuffler extends  JFileChooser {
-
-    private String lastPath;
-
-
-    public Shuffler(boolean hideFiles) {
-        addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
-        setAcceptAllFileFilterUsed(false);
-        setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        setPreferredSize(new Dimension(1000, 800));
-        setMultiSelectionEnabled(true);
-        setFileHidingEnabled(hideFiles);
-    }
-
-    public Shuffler(boolean hideFiles, String s) {
-        super(s);
-        addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
-        setAcceptAllFileFilterUsed(false);
-        setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        setPreferredSize(new Dimension(1000, 800));
-        setMultiSelectionEnabled(true);
-        setFileHidingEnabled(hideFiles);
-    }
-
-}
-
-=======
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -92,4 +59,3 @@ public class Shuffler {
         return images.get(0).getParent();
     }
 }
->>>>>>> 241f15d5d72429cd8e0089bb319141a8b3d44d35
