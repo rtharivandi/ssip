@@ -20,7 +20,7 @@ public class App extends JFrame {
     protected static final JLabel imageLabel = new JLabel();
 
     private final ScheduledExecutorService slideshowTime = Executors.newScheduledThreadPool(1);
-    private final ArrayList<Shuffler> folders = new ArrayList<>();
+    private final ArrayList<FolderShuffleInfo> folders = new ArrayList<>();
     private Future<?> future = null;
 
     private String lastPath;
@@ -116,11 +116,11 @@ public class App extends JFrame {
     }
 
     void selectFiles() {
-        JFileChooser chooser;
+        Shuffler chooser;
         if (lastPath == null)
-            chooser = new ImageFileChooser(false);
+            chooser = new Shuffler(false);
         else
-            chooser = new ImageFileChooser(false, lastPath);
+            chooser = new Shuffler(false, lastPath);
 
         int returnVal = chooser.showOpenDialog(null);
 
@@ -157,8 +157,8 @@ public class App extends JFrame {
         @Override
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT -> prevImage();
-                case KeyEvent.VK_RIGHT -> nextImage();
+                case KeyEvent.VK_LEFT : prevImage(); break;
+                case KeyEvent.VK_RIGHT : nextImage(); break;
             }
         }
 
@@ -237,7 +237,7 @@ public class App extends JFrame {
         if (currentFolder == -1)
             currentFolder = foldersSize - 1;
 
-        Shuffler temp = folders.get(currentFolder);
+        FolderShuffleInfo temp = folders.get(currentFolder);
         int tempSize = temp.getSize();
         int imageIndex = randomize ? new Random().nextInt(tempSize) : (next ? (temp.getCurrent() + 1) % tempSize : temp.getCurrent() - 1);
         if (imageIndex == -1)
@@ -256,7 +256,7 @@ public class App extends JFrame {
 
     private String getFolderShuffleInfoContinuous(boolean next) {
         currentFolder = randomize ? new Random().nextInt(folders.size()) : currentFolder;
-        Shuffler temp = folders.get(currentFolder);
+        FolderShuffleInfo temp = folders.get(currentFolder);
         int size = temp.getSize();
 
         int imageIndex = randomize ? (new Random().nextInt(size)) : (next ? (temp.getCurrent() + 1) % size : temp.getCurrent() - 1);
@@ -270,12 +270,12 @@ public class App extends JFrame {
 
     public void addImage(File file) {
         if (folders.size() == 0)
-            folders.add(new Shuffler());
+            folders.add(new FolderShuffleInfo());
         folders.get(folders.size() - 1).addImage(file);
     }
 
     public void addNewFolder() {
-        folders.add(new Shuffler());
+        folders.add(new FolderShuffleInfo());
     }
 
     public String clearImages() {

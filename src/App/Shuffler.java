@@ -4,14 +4,13 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.FileFilter;
 
-public class ImageFileChooser extends  JFileChooser {
+public class Shuffler extends  JFileChooser {
 
     private String lastPath;
 
 
-    public ImageFileChooser(boolean hideFiles) {
+    public Shuffler(boolean hideFiles) {
         addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
         setAcceptAllFileFilterUsed(false);
         setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -20,7 +19,7 @@ public class ImageFileChooser extends  JFileChooser {
         setFileHidingEnabled(hideFiles);
     }
 
-    public ImageFileChooser(boolean hideFiles, String s) {
+    public Shuffler(boolean hideFiles, String s) {
         super(s);
         addChoosableFileFilter(new FileNameExtensionFilter("Image files", ImageIO.getReaderFileSuffixes()));
         setAcceptAllFileFilterUsed(false);
