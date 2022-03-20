@@ -84,8 +84,9 @@ public class App extends JFrame {
     private ImageIcon getFittingSize(ImageIcon imageIcon, int width, int height) {
         int newWidth = imageIcon.getIconWidth();
         int newHeight = imageIcon.getIconHeight();
-
-        if (newWidth > width) {
+        
+        //If the image is landscape
+        if (newWidth > newHeight) {
             newWidth = width;
             newHeight = (newWidth * imageIcon.getIconHeight()) / imageIcon.getIconWidth();
         } else {
